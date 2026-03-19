@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chúc mừng sinh nhật Mẹ Liễu</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@600;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#050009;}
+
+/* ── LETTER SCENE AMBIENT ── */
+#letter-bg{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 52%, rgba(90,20,38,0.75) 0%, rgba(22,5,14,0.92) 58%, #050009 100%);
+  transition:opacity 2s ease;
+}
+#letter-bg.out{opacity:0;pointer-events:none;}
+
+/* ── FLOWER SCENE BG ── */
+#scene-bg{
+  position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 200% 80% at 50% 108%, #3c0d1c 0%, #120407 50%, #050009 100%);
+  opacity:0;transition:opacity 3.5s ease;
+}
+#scene-bg.on{opacity:1;}
+
+/* ── STARS ── */
+#stars{position:fixed;inset:0;z-index:1;pointer-events:none;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,4s) ease-in-out infinite var(--dl,0s);}
+@keyframes twinkle{0%,100%{opacity:0;}50%{opacity:var(--op,0.3);}}
+
+/* ── FALLING PETALS ── */
+#petals{position:fixed;inset:0;z-index:8;pointer-events:none;opacity:0;transition:opacity 4s ease;}
+#petals.on{opacity:1;}
+.fp{position:absolute;top:-20px;border-radius:60% 0 60% 0;width:var(--pw,10px);height:var(--pw,10px);background:var(--pc,#f4a0b0);opacity:0;animation:fpfall var(--fd,14s) linear var(--fdl,0s) infinite;}
+@keyframes fpfall{0%{opacity:0;top:-20px;transform:rotate(0) translateX(0);}7%{opacity:0.42;}90%{opacity:0.08;}100%{opacity:0;top:110vh;transform:rotate(540deg) translateX(var(--fx,25px));}}
+
+/* ══════════════════════════════════
+   ENVELOPE  –  completely rewritten
+   Uses perspective on the parent so
+   rotateX works reliably cross-browser
+══════════════════════════════════ */
+#letter-stage{
+  position:fixed;inset:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  transition:opacity 1.1s ease,transform 1.1s ease;
+}
+#letter-stage.out{opacity:0;transform:scale(0.9) translateY(-18px);pointer-events:none;}
+
+.letter-label{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
+  font-size:11px;letter-spacing:0.38em;text-transform:uppercase;
+  color:rgba(232,200,148,0.28);animation:lblink 3.2s ease-in-out infinite;
+}
+@keyframes lblink{0%,100%{opacity:0.15;}50%{opacity:0.8;}}
+
+/* perspective wrapper — essential for 3-D flap */
+.env-scene{
+  perspective:900px;
+  position:relative;width:360px;height:240px;
+  cursor:pointer;user-select:none;
+}
+.env-scene:hover .env-shadow{transform:translateY(-6px) scale(1.012);}
+
+/* drop-shadow on a separate layer so it doesn't interfere with perspective */
+.env-shadow{
+  position:absolute;inset:0;border-radius:3px 3px 6px 6px;
+  box-shadow:0 12px 44px rgba(0,0,0,0.62),0 3px 12px rgba(150,60,40,0.18);
+  transition:transform 0.4s ease;pointer-events:none;z-index:0;
+}
+
+/* envelope body */
+.env-body{
+  position:absolute;inset:0;border-radius:3px 3px 6px 6px;
+  background:#f5ecdc;overflow:hidden;z-index:1;
+  border:1px solid rgba(172,130,65,0.22);
+}
+/* linen texture */
+.env-body::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(130,90,42,0.022) 3px,rgba(130,90,42,0.022) 4px),
+    repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(130,90,42,0.015) 4px,rgba(130,90,42,0.015) 5px);
+}
+/* inner gold inset */
+.env-body::after{content:'';position:absolute;inset:5px;border:1px solid rgba(178,135,55,0.12);border-radius:1px;z-index:4;pointer-events:none;}
+
+/* V folds — all z-index below inner card */
+.env-fold-l{position:absolute;inset:0;z-index:2;clip-path:polygon(0 0,0 100%,52% 54%);background:linear-gradient(140deg,#e4c890,#cfa86a);}
+.env-fold-r{position:absolute;inset:0;z-index:2;clip-path:polygon(100% 0,100% 100%,48% 54%);background:linear-gradient(222deg,#e4c890,#cfa86a);}
+.env-fold-b{position:absolute;bottom:0;left:0;right:0;height:54%;z-index:2;clip-path:polygon(0 100%,50% 0,100% 100%);background:linear-gradient(175deg,#dabe88,#c2a062);}
+
+/* inner letter card — sits z:3 so it slides UP visible over the folds */
+.env-card{
+  position:absolute;left:18px;right:18px;bottom:9px;
+  height:168px;z-index:3;
+  background:#fefcf5;
+  border:1px solid rgba(178,135,52,0.13);border-radius:1px;
+  box-shadow:0 1px 5px rgba(0,0,0,0.055);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:18px;
+  /* start position: just inside envelope */
+  transform:translateY(0px);
+  transition:transform 1s cubic-bezier(0.22,1,0.36,1) 0.35s;
+}
+.env-card.risen{transform:translateY(-152px);}
+
+.lc-hr{width:32px;height:1px;background:linear-gradient(90deg,transparent,rgba(175,132,48,0.42),transparent);}
+.lc-from{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10.5px;color:#a07840;letter-spacing:0.1em;}
+.lc-to{font-family:'Dancing Script',cursive;font-weight:600;font-size:22px;color:#6c1a28;text-align:center;line-height:1.4;}
+.lc-open{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:9.5px;color:#be9e58;letter-spacing:0.22em;animation:lblink 2.8s ease-in-out infinite;}
+
+/* ── FLAP  (the key fix: separate element, perspective from .env-scene) ── */
+.env-flap{
+  position:absolute;top:0;left:0;right:0;height:122px;
+  z-index:5;              /* above card so it covers it when closed */
+  transform-origin:top center;
+  transform-style:preserve-3d;
+  transition:transform 1.05s cubic-bezier(0.36,0,0.16,1);
+  /* clip to triangle pointing DOWN */
+  clip-path:polygon(0 0, 50% 62%, 100% 0);
+  background:linear-gradient(176deg,#edd9a8 0%,#dcbd82 55%,#c9a466 100%);
+}
+/* sheen on flap front */
+.env-flap::before{
+  content:'';position:absolute;inset:0;
+  clip-path:polygon(0 0,50% 62%,100% 0);
+  background:linear-gradient(172deg,rgba(255,248,232,0.28) 0%,transparent 48%);
+}
+.env-flap.open{
+  transform:rotateX(-180deg);
+  z-index:1;              /* flip behind card once open */
+}
+
+/* tap hint */
+.tap-hint{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  z-index:25;pointer-events:none;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10.5px;
+  color:rgba(225,195,140,0.2);letter-spacing:0.24em;
+  animation:lblink 3.2s ease-in-out infinite;transition:opacity 0.8s;
+}
+
+/* ── BOUQUET SVG ── */
+#bouquet{position:fixed;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;opacity:0;transition:opacity 0.3s;}
+#bouquet.on{opacity:1;}
+
+/* ── MESSAGE ── */
+/* ═══════════════════════════════════
+   MESSAGE BANNER
+═══════════════════════════════════ */
+#msg {
+  position:fixed; inset:0; z-index:30; pointer-events:none;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  opacity:0; transition:opacity 2.2s ease;
+}
+#msg.on { opacity:1; }
+
+/* Banner card — the readable panel */
+.msg-banner {
+  position:relative;
+  display:flex; flex-direction:column; align-items:center;
+  padding: 44px 58px 40px;
+  max-width: min(520px, 88vw);
+  /* ivory parchment with subtle warm gradient */
+  background:
+    radial-gradient(ellipse 140% 110% at 50% 38%, #fdf6e8 0%, #f5e8cc 55%, #eddab0 100%);
+  border: 1px solid rgba(185,145,68,0.38);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 1px rgba(212,168,80,0.12),
+    0 28px 90px rgba(0,0,0,0.68),
+    0 6px 24px rgba(160,50,70,0.22),
+    inset 0 1px 0 rgba(255,252,240,0.9),
+    inset 0 -1px 0 rgba(180,140,60,0.15);
+  /* very light blur so flowers bleed softly through edges */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity:0; transform:translateY(20px) scale(0.97);
+  transition: opacity 2s ease 0.2s, transform 2s cubic-bezier(0.22,1,0.36,1) 0.2s;
+}
+/* linen texture overlay */
+.msg-banner > * { position:relative; z-index:1; }
+.msg-banner-tex {
+  position:absolute; inset:0; border-radius:3px; pointer-events:none; z-index:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(140,100,42,0.028) 3px,rgba(140,100,42,0.028) 4px),
+    repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(140,100,42,0.018) 4px,rgba(140,100,42,0.018) 5px);
+}
+#msg.on .msg-banner { opacity:1; transform:translateY(0) scale(1); }
+
+/* decorative corner rules */
+.msg-banner::before,
+.msg-banner::after {
+  content:''; position:absolute;
+  width:46px; height:46px;
+  border-color:rgba(185,145,55,0.42); border-style:solid;
+}
+.msg-banner::before { top:13px; left:13px; border-width:1px 0 0 1px; border-radius:1px 0 0 0; }
+.msg-banner::after  { bottom:13px; right:13px; border-width:0 1px 1px 0; border-radius:0 0 1px 0; }
+
+/* top ornament line */
+.banner-topline {
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  width:60px; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(160,120,40,0.5),transparent);
+}
+.banner-botline {
+  position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+  width:60px; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(160,120,40,0.5),transparent);
+}
+
+.m-sup {
+  font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:300;
+  font-size:clamp(0.75rem,1.8vw,1.05rem);
+  letter-spacing:0.32em; text-transform:uppercase;
+  color:rgba(120,68,28,0.78);
+  margin-bottom:6px;
+  opacity:0; transform:translateY(8px);
+  transition:opacity 1.6s ease 0.5s, transform 1.6s ease 0.5s;
+}
+#msg.on .m-sup { opacity:1; transform:translateY(0); }
+
+.m-name {
+  font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+  font-size:clamp(2.4rem,6.5vw,4.4rem);
+  line-height:1.08; text-align:center;
+  background:linear-gradient(128deg,#b87810,#8a5208 35%,#c89018 65%,#7a4008);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation:mglow 3.2s ease-in-out infinite;
+  opacity:0; transform:translateY(10px);
+  transition:opacity 1.6s ease 0.9s, transform 1.6s ease 0.9s;
+}
+#msg.on .m-name { opacity:1; transform:translateY(0); }
+@keyframes mglow {
+  0%,100%{filter:drop-shadow(0 2px 8px rgba(160,100,10,0.3));}
+  50%{filter:drop-shadow(0 3px 18px rgba(180,120,10,0.5));}
+}
+
+.m-heart {
+  font-size:clamp(1.4rem,3vw,2.1rem); color:#c03860; line-height:1; margin-top:2px;
+  animation:mhb 2.1s ease-in-out infinite;
+  opacity:0; transform:scale(0.3);
+  transition:opacity 1s ease 1.4s, transform 1s cubic-bezier(0.22,1,0.36,1) 1.4s;
+}
+#msg.on .m-heart { opacity:1; transform:scale(1); }
+@keyframes mhb { 0%,100%{transform:scale(1);} 16%{transform:scale(1.09);} 30%{transform:scale(0.95);} }
+
+.m-rule {
+  width:120px; height:1px; margin:18px 0;
+  background:linear-gradient(90deg,transparent,rgba(160,108,28,0.55),rgba(160,50,70,0.45),rgba(160,108,28,0.55),transparent);
+  opacity:0; transform:scaleX(0);
+  transition:opacity 1s ease 1.7s, transform 1.1s cubic-bezier(0.22,1,0.36,1) 1.7s;
+}
+#msg.on .m-rule { opacity:1; transform:scaleX(1); }
+
+.m-wish {
+  font-family:'Cormorant Garamond',serif; font-style:italic;
+  font-size:clamp(0.95rem,2vw,1.18rem);
+  letter-spacing:0.08em; line-height:2.0;
+  color:rgba(62,34,14,0.88);
+  text-align:center;
+  text-shadow: 0 1px 2px rgba(255,240,210,0.6);
+  opacity:0; transform:translateY(6px);
+  transition:opacity 1.4s ease 2s, transform 1.4s ease 2s;
+}
+#msg.on .m-wish { opacity:1; transform:translateY(0); }
+
+.m-from {
+  margin-top:22px;
+  font-family:'Dancing Script',cursive; font-size:1rem;
+  color:rgba(130,85,20,0.60); letter-spacing:0.07em;
+  opacity:0; transition:opacity 1.2s ease 2.5s;
+}
+#msg.on .m-from { opacity:1; }
+</style>
+</head>
+<body>
+
+<div id="letter-bg"></div>
+<div id="scene-bg"></div>
+<div id="stars"></div>
+<div id="petals"></div>
+<svg id="bouquet" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<!-- ══ LETTER ══ -->
+<div id="letter-stage">
+  <div class="letter-label">một lá thư nhỏ</div>
+  <div class="env-scene" id="env-scene" onclick="openLetter()">
+    <div class="env-shadow"></div>
+    <div class="env-body">
+      <div class="env-fold-l"></div>
+      <div class="env-fold-r"></div>
+      <div class="env-fold-b"></div>
+      <!-- card inside -->
+      <div class="env-card" id="env-card">
+
+        <div class="lc-hr"></div>
+        <div class="lc-to"> To <br>Mẹ Liễu</div>
+        <div class="lc-hr"></div>
+        <div class="lc-open">chạm để mở</div>
+      </div>
+    </div>
+    <!-- flap renders on top of everything, flips back when open -->
+    <div class="env-flap" id="env-flap"></div>
+  </div>
+</div>
+<div class="tap-hint" id="tap-hint">nhấp vào phong bì để mở</div>
+
+<!-- ══ MESSAGE ══ -->
+<div id="msg">
+  <div class="msg-banner">
+    <div class="msg-banner-tex"></div>
+    <div class="banner-topline"></div>
+    <div class="banner-botline"></div>
+    <div class="m-sup">Chúc Mừng Sinh Nhật</div>
+    <div class="m-name">Mẹ Liễu</div>
+    <div class="m-heart">&#9829;</div>
+    <div class="m-rule"></div>
+    <div class="m-wish">Chúc mẹ luôn mạnh khỏe hạnh phúc<br>và tràn đầy yêu thương</div>
+    <div class="m-from">— Con Rùa —</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════════════
+   STARS
+════════════════════════════════════════════════ */
+(function(){
+  var el=document.getElementById('stars');
+  for(var i=0;i<35;i++){
+    var s=document.createElement('div');s.className='star';
+    var sz=(Math.random()*1.5+0.4).toFixed(1);
+    s.style.cssText='left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*72).toFixed(1)+'%;width:'+sz+'px;height:'+sz+'px;--d:'+(3.5+Math.random()*5).toFixed(1)+'s;--dl:'+(Math.random()*9).toFixed(1)+'s;--op:'+(0.08+Math.random()*0.28).toFixed(2)+';';
+    el.appendChild(s);
+  }
+})();
+
+/* ════════════════════════════════════════════════
+   PETALS
+════════════════════════════════════════════════ */
+(function(){
+  var w=document.getElementById('petals');
+  var c=['#f7c5ce','#f4a0b0','#e6789a','#f8d0da','#fcc0d8'];
+  for(var i=0;i<18;i++){
+    var p=document.createElement('div');p.className='fp';
+    p.style.cssText='left:'+(Math.random()*105).toFixed(1)+'%;--pw:'+(7+Math.random()*9).toFixed(0)+'px;--pc:'+c[i%c.length]+';--fd:'+(12+Math.random()*10).toFixed(1)+'s;--fdl:'+(Math.random()*22).toFixed(1)+'s;--fx:'+((Math.random()-0.5)*60).toFixed(0)+'px;';
+    w.appendChild(p);
+  }
+})();
+
+/* ════════════════════════════════════════════════
+   SVG BOUQUET ENGINE
+════════════════════════════════════════════════ */
+var NS='http://www.w3.org/2000/svg';
+var GID=0;
+function uid(){return 'g'+(++GID);}
+
+/* shared CSS keyframes */
+var SS=document.createElement('style');
+document.head.appendChild(SS);
+var KFS={};
+function addCSS(s){SS.textContent+=s;}
+addCSS([
+  '@keyframes petalOpen{0%{opacity:0;transform:scaleY(0) scaleX(0.06);}16%{opacity:1;}100%{opacity:0.93;transform:scaleY(1) scaleX(1);}}',
+  '@keyframes leafIn{from{opacity:0;transform:scale(0.05);}to{opacity:0.9;transform:scale(1);}}',
+  '@keyframes cenPop{0%{opacity:0;transform:scale(0);}78%{transform:scale(1.1);}100%{opacity:1;transform:scale(1);}}',
+  '@keyframes swL{0%{transform:rotate(-2deg);}100%{transform:rotate(0.8deg);}}',
+  '@keyframes swR{0%{transform:rotate(-0.8deg);}100%{transform:rotate(2deg);}}',
+  '@keyframes swC{0%{transform:rotate(-1.4deg);}100%{transform:rotate(1.4deg);}}',
+].join(''));
+
+function kfStem(name,len){
+  if(!KFS[name]){KFS[name]=1;addCSS('@keyframes '+name+'{from{stroke-dashoffset:'+len+'}to{stroke-dashoffset:0}}');}
+}
+
+function E(tag,attrs){
+  var e=document.createElementNS(NS,tag);
+  for(var k in attrs)if(Object.prototype.hasOwnProperty.call(attrs,k))e.setAttribute(k,attrs[k]);
+  return e;
+}
+function rg(defs,id,c1,c2){
+  var g=E('radialGradient',{id:id,cx:'50%',cy:'65%',r:'70%'});
+  var s1=E('stop',{offset:'0%'});s1.setAttribute('stop-color',c1);
+  var s2=E('stop',{offset:'100%'});s2.setAttribute('stop-color',c2);
+  g.appendChild(s1);g.appendChild(s2);defs.appendChild(g);
+}
+function lg(defs,id){
+  var g=E('radialGradient',{id:id,cx:'35%',cy:'28%',r:'78%'});
+  [['0%','#78cc50'],['48%','#4e8030'],['100%','#2c4e18']].forEach(function(s){
+    var st=E('stop',{offset:s[0]});st.setAttribute('stop-color',s[1]);g.appendChild(st);
+  });
+  defs.appendChild(g);
+}
+function flt(defs,id,blur){
+  var f=E('filter',{id:id,x:'-100%',y:'-100%',width:'300%',height:'300%'});
+  var fb=E('feGaussianBlur',{stdDeviation:blur,result:'b'});
+  var fm=E('feMerge',{});
+  var n1=E('feMergeNode',{'in':'b'}),n2=E('feMergeNode',{'in':'SourceGraphic'});
+  fm.appendChild(n1);fm.appendChild(n2);f.appendChild(fb);f.appendChild(fm);defs.appendChild(f);
+}
+function B(p0,p1,p2,p3,t){var m=1-t;return m*m*m*p0+3*m*m*t*p1+3*m*t*t*p2+t*t*t*p3;}
+function arcL(x0,y0,a,b,c,d,x1,y1){
+  var l=0,px=x0,py=y0;
+  for(var i=1;i<=14;i++){var t=i/14;var nx=B(x0,a,c,x1,t),ny=B(y0,b,d,y1,t);var dx=nx-px,dy=ny-py;l+=Math.sqrt(dx*dx+dy*dy);px=nx;py=ny;}
+  return l;
+}
+function PP(rx,ry,f){
+  f=f==null?0.88:f;
+  return 'M0,0 C'+(rx*f).toFixed(1)+','+(-(ry*0.11)).toFixed(1)+' '+(rx*(f+0.09)).toFixed(1)+','+(-(ry*0.56)).toFixed(1)+' 0,'+(-(ry*1.01)).toFixed(1)+' C'+(-(rx*(f+0.09))).toFixed(1)+','+(-(ry*0.56)).toFixed(1)+' '+(-(rx*f)).toFixed(1)+','+(-(ry*0.11)).toFixed(1)+' 0,0';
+}
+function animStem(p,len,dur,delay){
+  var L=Math.ceil(len)+'';
+  p.setAttribute('stroke-dasharray',L);p.setAttribute('stroke-dashoffset',L);
+  var kn='k'+uid();kfStem(kn,L);
+  p.style.animation=kn+' '+dur.toFixed(2)+'s ease-out '+delay.toFixed(2)+'s forwards';
+}
+
+/* ── DRAW ROSE HEAD ── */
+function ROSE(root,defs,hx,hy,layers,cen,pi,pd,t0,gb){
+  var fid=uid();flt(defs,fid,gb||'5');
+  layers.forEach(function(L,li){
+    var gid=uid();rg(defs,gid,L.c1,L.c2);
+    var lo=li*(L.n*pi*0.26);
+    for(var i=0;i<L.n;i++){
+      var ang=(360/L.n)*i+(li%2===1?180/L.n:li===2?90/L.n:0);
+      var delay=t0+lo+i*pi;
+      var pg=E('g',{transform:'translate('+hx.toFixed(1)+','+hy.toFixed(1)+') rotate('+ang.toFixed(1)+')'});
+      var pe=E('path',{d:PP(L.rx,L.ry,L.f),fill:'url(#'+gid+')',opacity:'0'});
+      if(li===0)pe.setAttribute('filter','url(#'+fid+')');
+      pe.style.transformOrigin='0px 0px';
+      pe.style.animation='petalOpen '+pd.toFixed(2)+'s cubic-bezier(0.1,1,0.25,1) '+delay.toFixed(2)+'s forwards';
+      var vn=E('path',{d:'M0,0 Q'+(L.rx*0.1).toFixed(1)+','+(-(L.ry*0.5)).toFixed(1)+' 0,'+(-(L.ry*0.88)).toFixed(1),stroke:'rgba(255,255,255,0.11)','stroke-width':'0.8',fill:'none',opacity:'0'});
+      vn.style.animation='petalOpen '+pd.toFixed(2)+'s cubic-bezier(0.1,1,0.25,1) '+(delay+0.07).toFixed(2)+'s forwards';
+      pg.appendChild(vn);pg.appendChild(pe);root.appendChild(pg);
+    }
+  });
+  var lastL=layers[layers.length-1];
+  var cT=t0+(layers.length-1)*(lastL.n*pi*0.26)+(lastL.n-1)*pi+pd*0.35;
+  var cgid=uid();rg(defs,cgid,cen.c1,cen.c2);
+  var cfid=uid();flt(defs,cfid,'2.5');
+  var cg=E('g',{transform:'translate('+hx.toFixed(1)+','+hy.toFixed(1)+')'});
+  cg.style.opacity='0';cg.style.animation='cenPop 0.7s cubic-bezier(0.22,1,0.36,1) '+cT.toFixed(2)+'s forwards';
+  cg.appendChild(E('circle',{r:String(cen.r),fill:'url(#'+cgid+')',filter:'url(#'+cfid+')'}));
+  var sn=cen.s||14,sr=cen.r+2,sr2=cen.r+(cen.sl||6);
+  for(var s=0;s<sn;s++){
+    var sa=(360/sn)*s*Math.PI/180;
+    cg.appendChild(E('line',{x1:(sr*Math.sin(sa)).toFixed(2),y1:(-(sr*Math.cos(sa))).toFixed(2),x2:(sr2*Math.sin(sa)).toFixed(2),y2:(-(sr2*Math.cos(sa))).toFixed(2),stroke:cen.sc||'rgba(215,165,35,0.88)','stroke-width':'1','stroke-linecap':'round'}));
+    cg.appendChild(E('circle',{cx:((sr2+1.5)*Math.sin(sa)).toFixed(2),cy:(-((sr2+1.5)*Math.cos(sa))).toFixed(2),r:'1.5',fill:cen.sc||'rgba(215,165,35,0.88)'}));
+  }
+  root.appendChild(cg);
+  return cT+0.6;
+}
+
+/* ── BUD ── */
+function BUD(root,defs,bx,by,r,c1,c2,t0){
+  var gid=uid();rg(defs,gid,c1,c2);var fid=uid();flt(defs,fid,'3.5');
+  for(var i=0;i<8;i++){
+    var ang=(360/8)*i,delay=t0+i*0.10;
+    var pg=E('g',{transform:'translate('+bx.toFixed(1)+','+by.toFixed(1)+') rotate('+ang+')'});
+    var pe=E('path',{d:PP(r*0.55,r*1.2,0.65),fill:'url(#'+gid+')',opacity:'0'});
+    if(i===0)pe.setAttribute('filter','url(#'+fid+')');
+    pe.style.transformOrigin='0px 0px';
+    pe.style.animation='petalOpen 1.1s cubic-bezier(0.1,1,0.25,1) '+delay.toFixed(2)+'s forwards';
+    pg.appendChild(pe);root.appendChild(pg);
+  }
+  var cgid=uid();rg(defs,cgid,'#fff8d8','#f0b850');
+  var cg=E('g',{transform:'translate('+bx.toFixed(1)+','+by.toFixed(1)+')'});
+  cg.style.opacity='0';cg.style.animation='cenPop 0.4s ease '+(t0+8*0.10+0.4).toFixed(2)+'s forwards';
+  cg.appendChild(E('circle',{r:String(Math.max(3,r*0.32|0)),fill:'url(#'+cgid+')'}));
+  root.appendChild(cg);
+}
+
+/* ── LEAF ── */
+function LEAF(root,defs,lx,ly,ang,w,h,t0){
+  var lgid=uid();lg(defs,lgid);
+  var d='M0,0 C'+(w*0.30).toFixed(1)+','+(-(h*0.20)).toFixed(1)+' '+(w*0.80).toFixed(1)+','+(-(h*0.44)).toFixed(1)+' '+(w*0.70).toFixed(1)+','+(-(h*0.88)).toFixed(1)+' C'+(w*0.26).toFixed(1)+','+(-(h*1.02)).toFixed(1)+' '+(-(w*0.06)).toFixed(1)+','+(-(h*0.68)).toFixed(1)+' 0,0';
+  var g=E('g',{transform:'translate('+lx.toFixed(1)+','+ly.toFixed(1)+') rotate('+ang.toFixed(1)+')'});
+  var lp=E('path',{d:d,fill:'url(#'+lgid+')',opacity:'0'});lp.style.animation='leafIn 0.95s ease '+t0.toFixed(2)+'s forwards';
+  var vn=E('path',{d:'M0,0 Q'+(w*0.35).toFixed(1)+','+(-(h*0.48)).toFixed(1)+' '+(w*0.62).toFixed(1)+','+(-(h*0.82)).toFixed(1),stroke:'rgba(50,100,22,0.28)','stroke-width':'0.9',fill:'none',opacity:'0'});
+  vn.style.animation='leafIn 0.95s ease '+(t0+0.1).toFixed(2)+'s forwards';
+  g.appendChild(lp);g.appendChild(vn);root.appendChild(g);
+}
+
+/* ── STEM + LEAVES along it ── */
+function STEM(root,defs,ox,oy,fx,fy,cp1x,cp1y,cp2x,cp2y,sw,col,dur,delay){
+  var d='M'+ox.toFixed(1)+','+oy.toFixed(1)+' C'+cp1x.toFixed(1)+','+cp1y.toFixed(1)+' '+cp2x.toFixed(1)+','+cp2y.toFixed(1)+' '+fx.toFixed(1)+','+fy.toFixed(1);
+  var p=E('path',{d:d,stroke:col||'#3e6828','stroke-width':String(sw||4.5),fill:'none','stroke-linecap':'round'});
+  var L=arcL(ox,oy,cp1x,cp1y,cp2x,cp2y,fx,fy);
+  animStem(p,L,dur,delay);root.appendChild(p);
+  return {cp1x:cp1x,cp1y:cp1y,cp2x:cp2x,cp2y:cp2y};
+}
+
+function LEAVES(root,defs,ox,oy,cp1x,cp1y,cp2x,cp2y,fx,fy,t0,lw,lh){
+  [0.28,0.50,0.72].forEach(function(tp,li){
+    var lx=B(ox,cp1x,cp2x,fx,tp),ly=B(oy,cp1y,cp2y,fy,tp);
+    var nx=B(ox,cp1x,cp2x,fx,tp+0.02),ny=B(oy,cp1y,cp2y,fy,tp+0.02);
+    var ba=Math.atan2(ny-ly,nx-lx)*180/Math.PI;
+    var side=(li%2===0)?-1:1;
+    LEAF(root,defs,lx,ly,ba+side*58,lw,lh,t0+li*0.26);
+    LEAF(root,defs,lx,ly,ba-side*46,lw*0.68,lh*0.68,t0+li*0.26+0.16);
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   BUILD BOUQUET
+   13 flowers all from single origin
+   Tightly clustered, overlapping
+═══════════════════════════════════════════════════ */
+function buildBouquet(){
+  var W=window.innerWidth,H=window.innerHeight;
+  var OX=W*0.50,OY=H+18;
+
+  var svg=document.getElementById('bouquet');
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  svg.innerHTML='';
+
+  var defs=document.createElementNS(NS,'defs');svg.appendChild(defs);
+
+  /* ribbon */
+  var rwid=uid();rg(defs,rwid,'#8a2818','#4a1008');
+  svg.appendChild(E('ellipse',{cx:OX.toFixed(0),cy:(H-1).toFixed(0),rx:'36',ry:'13',fill:'url(#'+rwid+')',opacity:'0.72'}));
+  svg.appendChild(E('ellipse',{cx:(OX-40).toFixed(0),cy:(H-9).toFixed(0),rx:'28',ry:'14',fill:'#7a2010',opacity:'0.40',transform:'rotate(-26,'+(OX-40).toFixed(0)+','+(H-9).toFixed(0)+')'}));
+  svg.appendChild(E('ellipse',{cx:(OX+40).toFixed(0),cy:(H-9).toFixed(0),rx:'28',ry:'14',fill:'#7a2010',opacity:'0.40',transform:'rotate(26,'+(OX+40).toFixed(0)+','+(H-9).toFixed(0)+')'}));
+
+  var SC='#3e6828',SCM='#4e7c32',SCL='#5a9040';
+
+  /* ──────────────────────────────────────────
+     Helper: branch off a stem at param t
+  ────────────────────────────────────────── */
+  function branch(ox,oy,cp1x,cp1y,cp2x,cp2y,fx,fy, bt, bdx, bdy, sw, t0, stemDur, budOrRose, rDef){
+    var bpx=B(ox,cp1x,cp2x,fx,bt),bpy=B(oy,cp1y,cp2y,fy,bt);
+    var bfx=bpx+bdx,bfy=bpy+bdy;
+    var bc1x=bpx+bdx*0.35,bc1y=bpy+bdy*0.28;
+    var bc2x=bfx-bdx*0.12,bc2y=bfy+Math.abs(bdy)*0.08;
+    var bDelay=t0+stemDur*bt;
+    var bDur=stemDur*0.48;
+    STEM(svg,defs,bpx,bpy,bfx,bfy,bc1x,bc1y,bc2x,bc2y,sw,SCM,bDur,bDelay);
+    LEAF(svg,defs,bpx+bdx*0.28,bpy+bdy*0.28,(bdx>0?52:-58),18,33,bDelay+0.2);
+    LEAF(svg,defs,bpx+bdx*0.60,bpy+bdy*0.60,(bdx>0?-42:44),15,28,bDelay+0.44);
+    var rT=bDelay+bDur*0.68;
+    if(budOrRose==='bud'){
+      BUD(svg,defs,bfx,bfy,rDef.r,rDef.c1,rDef.c2,rT);
+    } else {
+      ROSE(svg,defs,bfx,bfy,rDef.layers,rDef.cen,0.12,1.2,rT,'3.5');
+    }
+  }
+
+  /* ── SMALL ROSE PRESETS ── */
+  var SR_CRIMSON={layers:[{n:9,rx:13,ry:28,c1:'#f098b0',c2:'#a02848',f:0.95},{n:7,rx:9,ry:20,c1:'#e07898',c2:'#802038',f:0.72},{n:5,rx:5,ry:12,c1:'#f8c0d0',c2:'#c04060',f:0.50}],cen:{r:6,c1:'#fff0e0',c2:'#f0b858',s:10,sl:5,sc:'rgba(210,155,30,0.88)'}};
+  var SR_BLUSH  ={layers:[{n:9,rx:13,ry:28,c1:'#fccce0',c2:'#d070a0',f:0.95},{n:7,rx:9,ry:20,c1:'#f8a8c8',c2:'#b05080',f:0.72},{n:5,rx:5,ry:12,c1:'#fde0ee',c2:'#c07090',f:0.50}],cen:{r:6,c1:'#fff0e0',c2:'#f0b858',s:10,sl:5,sc:'rgba(210,155,30,0.88)'}};
+  var SR_WINE   ={layers:[{n:9,rx:13,ry:28,c1:'#c05070',c2:'#780020',f:0.95},{n:7,rx:9,ry:20,c1:'#a03050',c2:'#600018',f:0.72},{n:5,rx:5,ry:12,c1:'#e08898',c2:'#903040',f:0.50}],cen:{r:6,c1:'#ffe0d0',c2:'#e8a050',s:10,sl:5,sc:'rgba(210,155,30,0.88)'}};
+  var SR_PEACH  ={layers:[{n:9,rx:13,ry:28,c1:'#fcd0a0',c2:'#e09040',f:0.95},{n:7,rx:9,ry:20,c1:'#f8b878',c2:'#c87028',f:0.72},{n:5,rx:5,ry:12,c1:'#fce0c0',c2:'#e09840',f:0.50}],cen:{r:6,c1:'#fff8e0',c2:'#f0d060',s:10,sl:5,sc:'rgba(200,150,20,0.9)'}};
+
+  /* ══════════════════════════════════
+     FLOWER 0 — CENTRE grand rose
+  ══════════════════════════════════ */
+  (function(){
+    var t0=0.3,sd=2.8;
+    var FX=OX,FY=H*0.10;
+    var cp1x=OX-20,cp1y=OY-(OY-FY)*0.22;
+    var cp2x=OX+15,cp2y=FY+(OY-FY)*0.19;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,5.2,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.42,30,56);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.38,-W*0.055,-H*0.10, 3.4,t0,sd,'rose',SR_BLUSH);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.60, W*0.052,-H*0.09, 3.0,t0,sd,'rose',SR_CRIMSON);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.76,-W*0.040,-H*0.065,2.5,t0,sd,'bud',{r:11,c1:'#f8c0d0',c2:'#b84068'});
+    ROSE(svg,defs,FX,FY,[
+      {n:18,rx:28,ry:62,c1:'#f8b0cc',c2:'#b84070',f:1.10},
+      {n:15,rx:21,ry:48,c1:'#f090a8',c2:'#903058',f:0.88},
+      {n:12,rx:14,ry:35,c1:'#d86088',c2:'#701840',f:0.68},
+      {n:9, rx:9, ry:23,c1:'#f8c0d0',c2:'#a84060',f:0.50},
+      {n:6, rx:5, ry:13,c1:'#ffd8e4',c2:'#c05878',f:0.32},
+    ],{r:13,c1:'#fff0d0',c2:'#f0a858',s:22,sl:9,sc:'rgba(218,162,38,0.9)'},0.17,2.1,t0+sd*0.70,'6');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 1 — LEFT blush peony
+  ══════════════════════════════════ */
+  (function(){
+    var t0=1.5,sd=2.4;
+    var FX=OX-W*0.082,FY=H*0.135;
+    var cp1x=OX-W*0.018,cp1y=OY-(OY-FY)*0.20;
+    var cp2x=FX+W*0.018,cp2y=FY+(OY-FY)*0.17;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,5,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.42,28,52);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.44,-W*0.052,-H*0.085,3.2,t0,sd,'rose',SR_BLUSH);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.68, W*0.042,-H*0.065,2.7,t0,sd,'bud',{r:10,c1:'#fccce0',c2:'#d878a8'});
+    ROSE(svg,defs,FX,FY,[
+      {n:16,rx:25,ry:56,c1:'#fccce0',c2:'#d878a8',f:1.06},
+      {n:13,rx:19,ry:43,c1:'#f8aac8',c2:'#b85888',f:0.86},
+      {n:10,rx:13,ry:31,c1:'#f09ab8',c2:'#904068',f:0.66},
+      {n:7, rx:8, ry:20,c1:'#fcd8e8',c2:'#c06888',f:0.46},
+      {n:5, rx:4, ry:12,c1:'#fee8f0',c2:'#d07898',f:0.30},
+    ],{r:11,c1:'#ffe8d8',c2:'#f0b858',s:18,sl:8,sc:'rgba(210,158,32,0.88)'},0.16,1.95,t0+sd*0.70,'5.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 2 — RIGHT wine rose
+  ══════════════════════════════════ */
+  (function(){
+    var t0=2.1,sd=2.4;
+    var FX=OX+W*0.082,FY=H*0.135;
+    var cp1x=OX+W*0.018,cp1y=OY-(OY-FY)*0.20;
+    var cp2x=FX-W*0.018,cp2y=FY+(OY-FY)*0.17;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,5,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.42,28,52);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.44, W*0.052,-H*0.085,3.2,t0,sd,'rose',SR_WINE);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.68,-W*0.042,-H*0.065,2.7,t0,sd,'bud',{r:10,c1:'#d87090',c2:'#880830'});
+    ROSE(svg,defs,FX,FY,[
+      {n:16,rx:25,ry:56,c1:'#d87090',c2:'#880830',f:1.06},
+      {n:13,rx:19,ry:43,c1:'#c05070',c2:'#700020',f:0.86},
+      {n:10,rx:13,ry:31,c1:'#e08898',c2:'#982848',f:0.66},
+      {n:7, rx:8, ry:20,c1:'#f8c0c8',c2:'#b04060',f:0.46},
+      {n:5, rx:4, ry:12,c1:'#fce0e0',c2:'#c05870',f:0.30},
+    ],{r:11,c1:'#ffe0d0',c2:'#e8a050',s:18,sl:8,sc:'rgba(210,155,30,0.88)'},0.16,1.95,t0+sd*0.70,'5.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 3 — LEFT-2 lavender anemone
+  ══════════════════════════════════ */
+  (function(){
+    var t0=3.0,sd=2.2;
+    var FX=OX-W*0.168,FY=H*0.185;
+    var cp1x=OX-W*0.030,cp1y=OY-(OY-FY)*0.19;
+    var cp2x=FX+W*0.025,cp2y=FY+(OY-FY)*0.16;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,4.5,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.40,26,48);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.46,-W*0.048,-H*0.082,2.9,t0,sd,'bud',{r:10,c1:'#d0a0e8',c2:'#6020a8'});
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.70, W*0.038,-H*0.055,2.4,t0,sd,'bud',{r:8,c1:'#e0c0f8',c2:'#8848c8'});
+    ROSE(svg,defs,FX,FY,[
+      {n:8,rx:30,ry:56,c1:'#d0a0e8',c2:'#6020a8',f:1.14},
+      {n:7,rx:16,ry:30,c1:'#e0c0f8',c2:'#8848c8',f:0.74},
+    ],{r:14,c1:'#100020',c2:'#280840',s:26,sl:10,sc:'rgba(210,170,255,0.85)'},0.13,1.8,t0+sd*0.70,'4.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 4 — RIGHT-2 blue clematis
+  ══════════════════════════════════ */
+  (function(){
+    var t0=3.6,sd=2.2;
+    var FX=OX+W*0.168,FY=H*0.185;
+    var cp1x=OX+W*0.030,cp1y=OY-(OY-FY)*0.19;
+    var cp2x=FX-W*0.025,cp2y=FY+(OY-FY)*0.16;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,4.5,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.40,26,48);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.46, W*0.048,-H*0.082,2.9,t0,sd,'bud',{r:10,c1:'#a0c8f8',c2:'#1848b0'});
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.70,-W*0.038,-H*0.055,2.4,t0,sd,'bud',{r:8,c1:'#c0dcfc',c2:'#3060c8'});
+    ROSE(svg,defs,FX,FY,[
+      {n:8,rx:30,ry:56,c1:'#a0c8f8',c2:'#1848b0',f:1.14},
+      {n:7,rx:16,ry:30,c1:'#c0dcfc',c2:'#3060c8',f:0.74},
+    ],{r:14,c1:'#080828',c2:'#101848',s:26,sl:10,sc:'rgba(160,200,255,0.85)'},0.13,1.8,t0+sd*0.70,'4.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 5 — LEFT-3 peach ranunculus
+  ══════════════════════════════════ */
+  (function(){
+    var t0=4.4,sd=2.1;
+    var FX=OX-W*0.248,FY=H*0.228;
+    var cp1x=OX-W*0.040,cp1y=OY-(OY-FY)*0.18;
+    var cp2x=FX+W*0.032,cp2y=FY+(OY-FY)*0.16;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,4.2,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.40,24,44);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.46,-W*0.048,-H*0.085,2.8,t0,sd,'rose',SR_PEACH);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.68,-W*0.036,-H*0.062,2.3,t0,sd,'bud',{r:9,c1:'#fcd0a0',c2:'#e09040'});
+    ROSE(svg,defs,FX,FY,[
+      {n:17,rx:20,ry:44,c1:'#fcd0a0',c2:'#e09040',f:1.0},
+      {n:14,rx:14,ry:33,c1:'#f8b878',c2:'#c87028',f:0.80},
+      {n:11,rx:9, ry:24,c1:'#fce0b8',c2:'#e09840',f:0.60},
+      {n:7, rx:5, ry:14,c1:'#fff0d8',c2:'#f0a848',f:0.40},
+    ],{r:9,c1:'#fff8e0',c2:'#f0d060',s:14,sl:6,sc:'rgba(200,150,20,0.9)'},0.11,1.7,t0+sd*0.70,'4');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 6 — RIGHT-3 blush ranunculus
+  ══════════════════════════════════ */
+  (function(){
+    var t0=5.0,sd=2.1;
+    var FX=OX+W*0.248,FY=H*0.228;
+    var cp1x=OX+W*0.040,cp1y=OY-(OY-FY)*0.18;
+    var cp2x=FX-W*0.032,cp2y=FY+(OY-FY)*0.16;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,4.2,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.40,24,44);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.46, W*0.048,-H*0.085,2.8,t0,sd,'rose',SR_CRIMSON);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.68, W*0.036,-H*0.062,2.3,t0,sd,'bud',{r:9,c1:'#f8c0d0',c2:'#d05880'});
+    ROSE(svg,defs,FX,FY,[
+      {n:17,rx:20,ry:44,c1:'#f8c0d0',c2:'#d05880',f:1.0},
+      {n:14,rx:14,ry:33,c1:'#f0a0b8',c2:'#b04060',f:0.80},
+      {n:11,rx:9, ry:24,c1:'#fcd8e4',c2:'#c06080',f:0.60},
+      {n:7, rx:5, ry:14,c1:'#fee8f0',c2:'#d06888',f:0.40},
+    ],{r:9,c1:'#fff0e8',c2:'#f0c058',s:14,sl:6,sc:'rgba(210,155,28,0.9)'},0.11,1.7,t0+sd*0.70,'4');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 7 — LEFT-4 deep purple tulip
+  ══════════════════════════════════ */
+  (function(){
+    var t0=5.8,sd=2.0;
+    var FX=OX-W*0.310,FY=H*0.265;
+    var cp1x=OX-W*0.055,cp1y=OY-(OY-FY)*0.18;
+    var cp2x=FX+W*0.035,cp2y=FY+(OY-FY)*0.15;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,4.0,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.38,23,43);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.52,-W*0.044,-H*0.078,2.6,t0,sd,'bud',{r:9,c1:'#c0a0e0',c2:'#5818a0'});
+    ROSE(svg,defs,FX,FY,[
+      {n:7, rx:22,ry:50,c1:'#c880e8',c2:'#5818a8',f:1.08},
+      {n:6, rx:14,ry:30,c1:'#daa0f8',c2:'#7838c8',f:0.78},
+      {n:5, rx:8, ry:18,c1:'#ecc8fc',c2:'#9050d8',f:0.55},
+    ],{r:10,c1:'#0e0028',c2:'#220848',s:20,sl:8,sc:'rgba(200,160,255,0.82)'},0.14,1.75,t0+sd*0.70,'4');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 8 — RIGHT-4 coral rose
+  ══════════════════════════════════ */
+  (function(){
+    var t0=6.3,sd=2.0;
+    var FX=OX+W*0.310,FY=H*0.265;
+    var cp1x=OX+W*0.055,cp1y=OY-(OY-FY)*0.18;
+    var cp2x=FX-W*0.035,cp2y=FY+(OY-FY)*0.15;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,4.0,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.38,23,43);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.52, W*0.044,-H*0.078,2.6,t0,sd,'bud',{r:9,c1:'#f8b098',c2:'#d85030'});
+    ROSE(svg,defs,FX,FY,[
+      {n:13,rx:22,ry:48,c1:'#f8a080',c2:'#d85030',f:1.02},
+      {n:11,rx:16,ry:36,c1:'#f8b898',c2:'#c04828',f:0.82},
+      {n:8, rx:10,ry:24,c1:'#fcd0b8',c2:'#d86040',f:0.62},
+      {n:6, rx:5, ry:14,c1:'#fee0d0',c2:'#e07848',f:0.42},
+    ],{r:10,c1:'#fff0e8',c2:'#f0c058',s:16,sl:7,sc:'rgba(215,155,25,0.9)'},0.13,1.78,t0+sd*0.70,'4.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 9 — FAR LEFT golden daisy
+  ══════════════════════════════════ */
+  (function(){
+    var t0=7.1,sd=1.9;
+    var FX=OX-W*0.360,FY=H*0.300;
+    var cp1x=OX-W*0.068,cp1y=OY-(OY-FY)*0.17;
+    var cp2x=FX+W*0.038,cp2y=FY+(OY-FY)*0.15;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,3.8,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.38,20,38);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.55,-W*0.040,-H*0.070,2.4,t0,sd,'bud',{r:8,c1:'#fce870',c2:'#d0a018'});
+    ROSE(svg,defs,FX,FY,[
+      {n:20,rx:10,ry:42,c1:'#fce870',c2:'#d0a018',f:0.74},
+      {n:15,rx:7, ry:30,c1:'#fff8a0',c2:'#e0b828',f:0.62},
+    ],{r:12,c1:'#1e1200',c2:'#382008',s:20,sl:7,sc:'rgba(200,150,30,0.88)'},0.09,1.55,t0+sd*0.70,'3.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 10 — FAR RIGHT white daisy
+  ══════════════════════════════════ */
+  (function(){
+    var t0=7.7,sd=1.9;
+    var FX=OX+W*0.360,FY=H*0.300;
+    var cp1x=OX+W*0.068,cp1y=OY-(OY-FY)*0.17;
+    var cp2x=FX-W*0.038,cp2y=FY+(OY-FY)*0.15;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,3.8,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.38,20,38);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.55, W*0.040,-H*0.070,2.4,t0,sd,'bud',{r:8,c1:'#f8f8f2',c2:'#d0d0b0'});
+    ROSE(svg,defs,FX,FY,[
+      {n:20,rx:10,ry:42,c1:'#f8f8f2',c2:'#d0d0b0',f:0.74},
+      {n:15,rx:7, ry:30,c1:'#ffffff',c2:'#e8e8d0',f:0.62},
+    ],{r:12,c1:'#1e1400',c2:'#342208',s:20,sl:7,sc:'rgba(210,165,40,0.88)'},0.09,1.55,t0+sd*0.70,'3.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 11 — INNER LEFT magenta rose (fills gap between 0 and 1)
+  ══════════════════════════════════ */
+  (function(){
+    var t0=8.4,sd=1.9;
+    var FX=OX-W*0.042,FY=H*0.195;
+    var cp1x=OX-W*0.010,cp1y=OY-(OY-FY)*0.19;
+    var cp2x=FX+W*0.010,cp2y=FY+(OY-FY)*0.16;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,3.5,SCM,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.40,20,38);
+    ROSE(svg,defs,FX,FY,[
+      {n:12,rx:18,ry:38,c1:'#f040b0',c2:'#900868',f:1.0},
+      {n:10,rx:12,ry:28,c1:'#e030a0',c2:'#700050',f:0.80},
+      {n:8, rx:7, ry:18,c1:'#f888c8',c2:'#a82880',f:0.60},
+      {n:5, rx:4, ry:11,c1:'#fcc0e4',c2:'#c04890',f:0.40},
+    ],{r:9,c1:'#fff0f8',c2:'#f0a8d8',s:14,sl:6,sc:'rgba(220,120,200,0.88)'},0.14,1.75,t0+sd*0.70,'4.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 12 — INNER RIGHT apricot rose (fills gap between 0 and 2)
+  ══════════════════════════════════ */
+  (function(){
+    var t0=9.0,sd=1.9;
+    var FX=OX+W*0.042,FY=H*0.195;
+    var cp1x=OX+W*0.010,cp1y=OY-(OY-FY)*0.19;
+    var cp2x=FX-W*0.010,cp2y=FY+(OY-FY)*0.16;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,3.5,SCM,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.40,20,38);
+    ROSE(svg,defs,FX,FY,[
+      {n:12,rx:18,ry:38,c1:'#f8c088',c2:'#d07828',f:1.0},
+      {n:10,rx:12,ry:28,c1:'#f8a868',c2:'#b05818',f:0.80},
+      {n:8, rx:7, ry:18,c1:'#fcd8a8',c2:'#d89038',f:0.60},
+      {n:5, rx:4, ry:11,c1:'#feecd0',c2:'#e8a848',f:0.40},
+    ],{r:9,c1:'#fff8e8',c2:'#f0d068',s:14,sl:6,sc:'rgba(210,155,25,0.9)'},0.14,1.75,t0+sd*0.70,'4.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 13 — deep left blush spray (fills outer left gap)
+  ══════════════════════════════════ */
+  (function(){
+    var t0=9.7,sd=1.85;
+    var FX=OX-W*0.128,FY=H*0.245;
+    var cp1x=OX-W*0.022,cp1y=OY-(OY-FY)*0.18;
+    var cp2x=FX+W*0.020,cp2y=FY+(OY-FY)*0.15;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,3.2,SCM,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.38,20,37);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.50,-W*0.038,-H*0.072,2.4,t0,sd,'bud',{r:9,c1:'#f8d0e8',c2:'#c06090'});
+    ROSE(svg,defs,FX,FY,[
+      {n:11,rx:16,ry:35,c1:'#f8c8e0',c2:'#c85888',f:0.98},
+      {n:9, rx:11,ry:26,c1:'#f0a8c8',c2:'#a03868',f:0.78},
+      {n:7, rx:6, ry:16,c1:'#fce0ee',c2:'#c06080',f:0.56},
+    ],{r:8,c1:'#fff0f0',c2:'#f0b8d0',s:12,sl:5,sc:'rgba(210,120,160,0.88)'},0.13,1.65,t0+sd*0.70,'4');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 14 — deep right ivory rose (fills outer right gap)
+  ══════════════════════════════════ */
+  (function(){
+    var t0=10.2,sd=1.85;
+    var FX=OX+W*0.128,FY=H*0.245;
+    var cp1x=OX+W*0.022,cp1y=OY-(OY-FY)*0.18;
+    var cp2x=FX-W*0.020,cp2y=FY+(OY-FY)*0.15;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,3.2,SCM,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.38,20,37);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.50, W*0.038,-H*0.072,2.4,t0,sd,'bud',{r:9,c1:'#f8e8c8',c2:'#c09038'});
+    ROSE(svg,defs,FX,FY,[
+      {n:11,rx:16,ry:35,c1:'#fdf0d8',c2:'#d0a050',f:0.98},
+      {n:9, rx:11,ry:26,c1:'#f8e0b8',c2:'#b07828',f:0.78},
+      {n:7, rx:6, ry:16,c1:'#fef6e8',c2:'#d8b060',f:0.56},
+    ],{r:8,c1:'#fffce8',c2:'#f0d880',s:12,sl:5,sc:'rgba(200,158,28,0.9)'},0.13,1.65,t0+sd*0.70,'4');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 15 — centre-low crimson bud cluster (depth behind main rose)
+  ══════════════════════════════════ */
+  (function(){
+    var t0=10.8,sd=1.8;
+    var FX=OX-W*0.018,FY=H*0.245;
+    var cp1x=OX-W*0.006,cp1y=OY-(OY-FY)*0.17;
+    var cp2x=FX+W*0.006,cp2y=FY+(OY-FY)*0.14;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,3.0,SCM,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.36,18,34);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.48,-W*0.030,-H*0.065,2.2,t0,sd,'bud',{r:8,c1:'#f0a0b8',c2:'#a02848'});
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.65, W*0.028,-H*0.050,2.0,t0,sd,'bud',{r:7,c1:'#f8c0d0',c2:'#c04870'});
+    ROSE(svg,defs,FX,FY,[
+      {n:10,rx:14,ry:30,c1:'#e87898',c2:'#980838',f:0.95},
+      {n:8, rx:9, ry:22,c1:'#d05878',c2:'#780028',f:0.76},
+      {n:6, rx:5, ry:13,c1:'#f0a8b8',c2:'#b04060',f:0.54},
+    ],{r:7,c1:'#ffe8e0',c2:'#f0a850',s:12,sl:5,sc:'rgba(215,160,30,0.9)'},0.13,1.6,t0+sd*0.70,'3.5');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 16 — far left outer dusty rose
+  ══════════════════════════════════ */
+  (function(){
+    var t0=11.4,sd=1.75;
+    var FX=OX-W*0.415,FY=H*0.335;
+    var cp1x=OX-W*0.080,cp1y=OY-(OY-FY)*0.17;
+    var cp2x=FX+W*0.040,cp2y=FY+(OY-FY)*0.14;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,3.5,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.36,19,36);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.52,-W*0.036,-H*0.068,2.3,t0,sd,'bud',{r:8,c1:'#e8b8c8',c2:'#985068'});
+    ROSE(svg,defs,FX,FY,[
+      {n:13,rx:18,ry:40,c1:'#d8a8c0',c2:'#884868',f:1.0},
+      {n:11,rx:12,ry:30,c1:'#c890b0',c2:'#703858',f:0.80},
+      {n:8, rx:7, ry:19,c1:'#e8c0d4',c2:'#9a5878',f:0.58},
+    ],{r:9,c1:'#f8f0f8',c2:'#e8c8e0',s:14,sl:6,sc:'rgba(180,100,140,0.88)'},0.12,1.65,t0+sd*0.70,'4');
+  })();
+
+  /* ══════════════════════════════════
+     FLOWER 17 — far right outer sage + white
+  ══════════════════════════════════ */
+  (function(){
+    var t0=11.9,sd=1.75;
+    var FX=OX+W*0.415,FY=H*0.335;
+    var cp1x=OX+W*0.080,cp1y=OY-(OY-FY)*0.17;
+    var cp2x=FX-W*0.040,cp2y=FY+(OY-FY)*0.14;
+    STEM(svg,defs,OX,OY,FX,FY,cp1x,cp1y,cp2x,cp2y,3.5,SC,sd,t0);
+    LEAVES(svg,defs,OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY,t0+sd*0.36,19,36);
+    branch(OX,OY,cp1x,cp1y,cp2x,cp2y,FX,FY, 0.52, W*0.036,-H*0.068,2.3,t0,sd,'bud',{r:8,c1:'#f0f0e0',c2:'#c0c0a0'});
+    ROSE(svg,defs,FX,FY,[
+      {n:14,rx:10,ry:36,c1:'#f4f4ec',c2:'#c8c8a8',f:0.72},
+      {n:11,rx:7, ry:26,c1:'#fefef8',c2:'#deded8',f:0.60},
+    ],{r:11,c1:'#201800',c2:'#382808',s:18,sl:7,sc:'rgba(195,155,35,0.88)'},0.10,1.55,t0+sd*0.70,'3.5');
+  })();
+}
+
+/* ════════════════════════════════════════════════
+   OPEN ENVELOPE — stage-by-stage
+════════════════════════════════════════════════ */
+var done=false;
+function openLetter(){
+  if(done)return;done=true;
+  document.getElementById('tap-hint').style.opacity='0';
+
+  /* 1. Flap rises (rotateX -186deg for a slight overshoot feel) */
+  var flap=document.getElementById('env-flap');
+  flap.classList.add('open');
+
+  /* 2. Card slides up out of envelope after flap is ~halfway */
+  setTimeout(function(){
+    document.getElementById('env-card').classList.add('risen');
+  },480);
+
+  /* 3. Whole letter stage fades out */
+  setTimeout(function(){
+    document.getElementById('letter-stage').classList.add('out');
+  },1500);
+
+  /* 4. Letter bg fades, flower bg rises */
+  setTimeout(function(){
+    document.getElementById('letter-bg').classList.add('out');
+    document.getElementById('scene-bg').classList.add('on');
+  },1800);
+
+  /* 5. Build & show bouquet */
+  setTimeout(function(){
+    buildBouquet();
+    document.getElementById('bouquet').classList.add('on');
+  },2100);
+
+  /* 6. Petals drift in */
+  setTimeout(function(){
+    document.getElementById('petals').classList.add('on');
+  },9000);
+
+  /* 7. Message */
+  setTimeout(function(){
+    document.getElementById('msg').classList.add('on');
+  },21000);
+}
+</script>
+</body>
+</html>
